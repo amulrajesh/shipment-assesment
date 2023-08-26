@@ -13,5 +13,5 @@ import java.util.Map;
 public class Aggregate {
     private Map<String, String> track;
     private Map<String, ArrayList<String>> shipments;
-    private Map<String, String> pricing;
+    private Map<String, Double> pricing;
 }

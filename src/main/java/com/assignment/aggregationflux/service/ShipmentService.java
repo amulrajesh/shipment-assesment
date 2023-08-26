@@ -24,7 +24,7 @@ public class ShipmentService {
         }
         System.out.println("Calling shipment API " + ids);
         String val = String.join(",", ids);
-        String url = configProperties.getShipmentPath() + "?ids=" + val;
+        String url = configProperties.getShipmentPath() + "?q=" + val;
         return webClientUtil.invokeApi(url);
     }
 }

@@ -1,5 +1,5 @@
 shipment:
   base-url: http://localhost:8081/
   track-path: track
-  shipment-path: shipment
+  shipment-path: shipments
   pricing-path: pricing

@@ -5,8 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ReplayProcessor;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +14,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 @AllArgsConstructor
 public class AggregateService {
-    private static final Logger log =
-            LoggerFactory.getLogger(AggregateService.class);
+	
+	
+	private static final Logger log = LoggerFactory.getLogger(AggregateService.class);
 
     ShipmentService shipmentService;
 
@@ -62,4 +61,5 @@ public class AggregateService {
         });
 
     }
+
 }

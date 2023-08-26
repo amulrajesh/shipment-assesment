@@ -21,7 +21,7 @@ public class TrackService {
         if(ids == null || ids.isEmpty()) {
             return Mono.just(Collections.emptyMap());
         }
-        String url = configProperties.getTrackPath() + "?ids=" + ids;
+        String url = configProperties.getTrackPath() + "?q=" + ids;
         return webClientUtil.invokeApi(url);
     }
 

@@ -22,7 +22,7 @@ public class PricingService {
         if(ids == null || ids.isEmpty()) {
             return Mono.just(Collections.emptyMap());
         }
-        String url = configProperties.getPricingPath() + "?pricings=" + ids;
+        String url = configProperties.getPricingPath() + "?q=" + ids;
         return webClientUtil.invokeApi(url);
     }
 
