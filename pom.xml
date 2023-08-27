@@ -21,6 +21,17 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/io.projectreactor.addons/reactor-extra -->
+		<dependency>
+    		<groupId>io.projectreactor.addons</groupId>
+    		<artifactId>reactor-extra</artifactId>
+    	</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
+		
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
