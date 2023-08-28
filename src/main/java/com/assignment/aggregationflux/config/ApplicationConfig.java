@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 
@@ -45,5 +47,11 @@ public class ApplicationConfig {
                 .evictInBackground(Duration.ofSeconds(120))
                 .pendingAcquireTimeout(Duration.ofSeconds(60))
                 .build();
+    }
+
+    @Bean
+    public Scheduler scheduler(){
+        return Schedulers
+                .newBoundedElastic(10, 10,"BoundedElasticThread");
     }
 }

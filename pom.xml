@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.assignment</groupId>
-	<artifactId>aggregation-flux</artifactId>
+	<artifactId>aggregation-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>aggregation-flux</name>
+	<name>aggregation-api</name>
 	<description>Application Using webflix</description>
 	<properties>
 		<java.version>17</java.version>
@@ -21,17 +21,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/io.projectreactor.addons/reactor-extra -->
 		<dependency>
-    		<groupId>io.projectreactor.addons</groupId>
-    		<artifactId>reactor-extra</artifactId>
-    	</dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
-        </dependency>
-		
+			<groupId>io.projectreactor.addons</groupId>
+			<artifactId>reactor-extra</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>

@@ -3,8 +3,7 @@ aggregation:
   track-path: track
   shipment-path: shipments
   pricing-path: pricing
-  cache:
-    enabled: true
-    port: 3000
-    host: localhost
-    expiration: 30m
+
+logging.level:
+  root: INFO
+  com.assignment.aggregationflux: debug

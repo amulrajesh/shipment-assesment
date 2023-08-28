@@ -1,5 +1,4 @@
 package com.assignment.aggregationflux.properties;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -25,15 +24,4 @@ public class ConfigProperties {
     String shipmentPath;
 
     String pricingPath;
-
-    Cache cache;
-
-    @Getter
-    @Setter
-	public static class Cache {
-        private boolean enabled;
-        private String host;
-        private String port;
-        private Duration expiration;
-    }
 }

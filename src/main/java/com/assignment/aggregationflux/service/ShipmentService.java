@@ -1,107 +1,82 @@
 package com.assignment.aggregationflux.service;
 
+import com.assignment.aggregationflux.utils.AppClient;
+import com.assignment.aggregationflux.utils.AppConstant;
+import com.assignment.aggregationflux.utils.AppUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import reactor.cache.CacheMono;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.Signal;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
-@SuppressWarnings({ "deprecation", "rawtypes" })
-public class ShipmentService {	
-	
-	private static final Logger log = LoggerFactory.getLogger(AggregateService.class);
+public class ShipmentService {
 
-    private WebClientUtil webClientUtil;
-    
-    public ShipmentService(WebClientUtil webClientUtil) {
-    	this.webClientUtil = webClientUtil;
+    private static final Logger log = LoggerFactory.getLogger(ShipmentService.class);
+
+    private final ConcurrentLinkedQueue<Map<String, List<String>>> incomingQueue = new ConcurrentLinkedQueue<>();
+
+    private final Map<String, List<String>> shipmentQueue = new HashMap<>();
+
+    private final Map<String, Mono<Map>> outgoingMap = new HashMap<>();
+
+    AppClient appClient;
+
+    public ShipmentService(AppClient appClient) {
+        this.appClient = appClient;
     }
 
-    private final ConcurrentLinkedQueue<Mono<List<String>>> queue = new ConcurrentLinkedQueue<Mono<List<String>>>();
-    
-    private final AtomicBoolean apiInvoked = new AtomicBoolean(Boolean.FALSE);
+    public Mono<Map> process(Optional<List<String>> ids) {
 
-    private final CountDownLatch latch = new CountDownLatch(1);
-    
-    private String key = "";
-    
-    Map<String, Signal<? extends Map>> mapStringSignalCache = new HashMap<>();
-    
-    public Mono<Map> process(List<String> ids) throws InterruptedException {
-
-        if (ids == null) {
+        if (ids.isEmpty()) {
             return Mono.just(Collections.emptyMap());
         }
 
-        Mono<List<String>> data = Mono.just(ids);
-        
-        queue.add(data);
-        
-        Mono<List<String>> mono = Mono.fromCallable(() -> {
-            if (queue.size() >= 2) {
-                log.info("Queue size is " + queue.size());
-                if (apiInvoked.compareAndSet(false, true)) {
-                	key = UUID.randomUUID().toString().replace("-", "");
-                    return getMergedData();
-                }
+        log.debug("Start Shipment processing");
+
+        //Unique key to identify request and filter from bulk payload response
+        String key = UUID.randomUUID().toString().replace("-", "" );
+
+        AppUtil.addToIncomingQueueMap(incomingQueue, key, ids.get());
+
+        shipmentQueue.put(key, ids.get());
+
+        Mono<Map<String, List<String>>> mono = Mono.fromCallable(() -> {
+            if (shipmentQueue.size() >= 5) {
+                log.debug("Invoking API because Queue size reaches maximum " + shipmentQueue.size());
+                appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_SHIPMENT_STR);
+                log.debug("Complete API because Queue size reaches maximum " + shipmentQueue.size());
+                return shipmentQueue;
             }
+            //Wait for 5 seconds
             Thread.sleep(5000);
-            log.info("Time limit reached " + key);
-            apiInvoked.compareAndSet(false, true);
-            key = UUID.randomUUID().toString().replace("-", "");
-            return getMergedData();
+            log.debug("Invoking API because of timer expiry " + shipmentQueue.size());
+            appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_SHIPMENT_STR);
+            log.debug("Complete API because Queue size reaches maximum " + shipmentQueue.size());
+            return shipmentQueue;
         });
-        
-        return invokeApi(mono, key);
+
+        log.debug("End Shipment processing");
+
+        return getOutput(mono, key);
 
     }
-    
-    private List<String> getMergedData() {
-    	List<String> mergedData = new ArrayList<String>();
-    	while(!queue.isEmpty()) {
-    		mergedData.addAll(queue.poll().block());
-    	}
-    	return mergedData;
-    }
-    
-	private Mono<Map> invokeApi(Mono<List<String>> mono, String key) {
-    	log.info("Key " + key);
-    	return CacheMono
-                .lookup(mapStringSignalCache, key)
-                .onCacheMissResume(this.fetchApiResponse(mono)).cache(Duration.ofSeconds(12));
-    	
-    }
-    
-    private Mono<Map> fetchApiResponse(Mono<List<String>> mono) {
-    	
-    	log.info("Cache miss ");
-    	
-    	return mono.flatMap(id -> {
-            if(apiInvoked.get()) {
-                Mono<Map> output = webClientUtil.callApi(id, "shipment-path")
-                        .log()
-                        .doFinally(op -> {
-                            apiInvoked.set(false);
-                            latch.countDown();
-                        });
-                return output;
-            }
-            return Mono.empty();
-        });
-    	
+
+    /**
+     * Iterate Mono
+     * 1. Filter using key
+     * 2. Get output from the OutgoingMap using key
+     * 3. Repeat the flow when the result is empty
+     */
+    private Mono<Map> getOutput(Mono<Map<String, List<String>>> mono,
+                                String key) {
+
+        return mono
+                .filter(id -> id.containsKey(key))
+                .flatMap(id -> AppUtil.getResponse(key, shipmentQueue, outgoingMap))
+                .map(m -> m);
+
     }
 }

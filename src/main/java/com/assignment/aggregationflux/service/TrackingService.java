@@ -14,19 +14,19 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Service
-public class PricingService {
+public class TrackingService {
 
-    private static final Logger log = LoggerFactory.getLogger(PricingService.class);
+    private static final Logger log = LoggerFactory.getLogger(TrackingService.class);
 
     private final ConcurrentLinkedQueue<Map<String, List<String>>> incomingQueue = new ConcurrentLinkedQueue<>();
 
-    private final Map<String, List<String>> pricingQueue = new HashMap<>();
+    private final Map<String, List<String>> trackingQueue = new HashMap<>();
 
     private final Map<String, Mono<Map>> outgoingMap = new HashMap<>();
 
     AppClient appClient;
 
-    public PricingService(AppClient appClient) {
+    public TrackingService(AppClient appClient) {
         this.appClient = appClient;
     }
 
@@ -36,31 +36,31 @@ public class PricingService {
             return Mono.just(Collections.emptyMap());
         }
 
-        log.debug("Start Pricing processing");
+        log.debug("Start Tracking processing");
 
         //Unique key to identify request and filter from bulk payload response
         String key = UUID.randomUUID().toString().replace("-", "" );
 
         AppUtil.addToIncomingQueueMap(incomingQueue, key, ids.get());
 
-        pricingQueue.put(key, ids.get());
+        trackingQueue.put(key, ids.get());
 
         Mono<Map<String, List<String>>> mono = Mono.fromCallable(() -> {
-            if (pricingQueue.size() >= 5) {
-                log.debug("Invoking API because Queue size reaches maximum " + pricingQueue.size());
-                appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_PRICING_STR);
-                log.debug("Complete API because Queue size reaches maximum " + pricingQueue.size());
-                return pricingQueue;
+            if (trackingQueue.size() >= 5) {
+                log.debug("Invoking API because Queue size reaches maximum " + trackingQueue.size());
+                appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_TRACKING_STR);
+                log.debug("Complete API because Queue size reaches maximum " + trackingQueue.size());
+                return trackingQueue;
             }
             //Wait for 5 seconds
             Thread.sleep(5000);
-            log.debug("Invoking API because of timer expiry " + pricingQueue.size());
-            appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_PRICING_STR);
-            log.debug("Complete API because Queue size reaches maximum " + pricingQueue.size());
-            return pricingQueue;
+            log.debug("Invoking API because of timer expiry " + trackingQueue.size());
+            appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_TRACKING_STR);
+            log.debug("Complete API because Queue size reaches maximum " + trackingQueue.size());
+            return trackingQueue;
         });
 
-        log.debug("End Pricing processing");
+        log.debug("End Tracking processing");
 
         return getOutput(mono, key);
 
@@ -77,7 +77,7 @@ public class PricingService {
 
         return mono
                 .filter(id -> id.containsKey(key))
-                .flatMap(id -> AppUtil.getResponse(key, pricingQueue, outgoingMap))
+                .flatMap(id -> AppUtil.getResponse(key, trackingQueue, outgoingMap))
                 .map(m -> m);
 
     }
