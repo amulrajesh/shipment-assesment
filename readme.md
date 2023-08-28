@@ -12,6 +12,12 @@
         Helm 3
 ```
 
+```curl
+	Run XYZ Back-end assesment services in port 8081. If running back-end services in different port please update the port in application.yml
+	
+	docker run -p 8081:8081 xyzassessment/backend-services
+```
+
 ## Application Details
 ```curl
         Aggregation API
