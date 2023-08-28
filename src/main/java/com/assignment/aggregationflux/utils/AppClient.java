@@ -60,9 +60,9 @@ public class AppClient {
                         parseResponse(tempOutgoingMap, (String) k, v, incomingMap);
                     });
                     //convert it to mono map
-                    incomingMap.forEach((k, v) -> {
-                        outgoingMap.put(k, Mono.just(tempOutgoingMap.get(k)));
-                    });
+                    //incomingMap.forEach((k, v) -> {
+                      //  outgoingMap.put(k, Mono.just(tempOutgoingMap.get(k)));
+                    //});
                     return m;
                 });
 
@@ -70,7 +70,6 @@ public class AppClient {
 
         //Save the response for each key in outgoingMap
         //Parse the aggregated response with payload in incomingMap field
-        System.out.println("Size " + tempOutgoingMap.size());
         incomingMap.keySet().forEach(k -> {
             outgoingMap.put(k, response);
         });

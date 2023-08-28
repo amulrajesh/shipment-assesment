@@ -1,5 +1,6 @@
 package com.assignment.aggregationflux.service;
 
+import com.assignment.aggregationflux.properties.ConfigProperties;
 import com.assignment.aggregationflux.utils.AppClient;
 import com.assignment.aggregationflux.utils.AppConstant;
 import com.assignment.aggregationflux.utils.AppUtil;
@@ -23,9 +24,12 @@ public class ShipmentService {
     private final Map<String, Mono<Map>> outgoingMap = new HashMap<>();
 
     AppClient appClient;
+    
+    ConfigProperties configProperties;
 
-    public ShipmentService(AppClient appClient) {
+    public ShipmentService(AppClient appClient, ConfigProperties configProperties) {
         this.appClient = appClient;
+        this.configProperties = configProperties;
     }
 
     public Mono<Map> process(Optional<List<String>> ids) {
@@ -44,14 +48,14 @@ public class ShipmentService {
         shipmentQueue.put(key, ids.get());
 
         Mono<Map<String, List<String>>> mono = Mono.fromCallable(() -> {
-            if (shipmentQueue.size() >= 5) {
+            if (shipmentQueue.size() >= configProperties.getQueueSize()) {
                 log.debug("Invoking API because Queue size reaches maximum " + shipmentQueue.size());
                 appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_SHIPMENT_STR);
                 log.debug("Complete API because Queue size reaches maximum " + shipmentQueue.size());
                 return shipmentQueue;
             }
             //Wait for 5 seconds
-            Thread.sleep(5000);
+            Thread.sleep(configProperties.getApiQueueTimeLimit());
             log.debug("Invoking API because of timer expiry " + shipmentQueue.size());
             appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_SHIPMENT_STR);
             log.debug("Complete API because Queue size reaches maximum " + shipmentQueue.size());

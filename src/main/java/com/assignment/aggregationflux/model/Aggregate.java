@@ -1,6 +1,5 @@
 package com.assignment.aggregationflux.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
 
@@ -9,7 +8,6 @@ import java.util.Map;
 
 @Data
 @ToString
-//@AllArgsConstructor(staticName = "create")
 public class Aggregate {
     private Map<String, Double> pricing;
     private Map<String, String> track;

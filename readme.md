@@ -16,12 +16,16 @@
 ```curl
         Aggregation API
             An API (/aggregation) calls the Pricing, Tracking and Shipment APIs and return the aggregated response.
+            
+       Idea:
+       		- Using queues to maintain incoming request and store the aggregate response
+       		- It would be nice if we use any messaging server like Kafka or RabbitMQ 
         
-        Scenario
+        Flow
             - Call Pricing, Tracking and Shipment APIs individually.
-            - When calling any API it will wait till queue reaches 5 request or till time reaches 5 seconds
-            - Generating an UID for each request
-            - Assigning the payload and UID in incomeQueue variable, so later we can filter the aggreate resposne and write it to an outgoinQueue          
+            - When calling any API it will wait till queue reaches 5 request or till time reaches 5 seconds - The Queue size and time limit is configured in application.yml file
+            - Generating an UID for each request to map the response back with aggregated response
+            - Assigning the payload and UID in incomeQueue variable, so later we can filter the aggregate response and write it to an outgoingQueue          
            
 ```
 
@@ -60,16 +64,4 @@
                 NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
                 deployment.apps/aggregation-api   2/2     2            2           26m
 
-```
-
-## Running with Helm
-```curl
-        Greetings API
-
-            1. cd greetings/helm/
-
-            2. Execute command "helm install aggregration-api aggregration-api --values aggregration-api/values.yaml"
-
-            3. To verify deployment execute "helm list"
-        
 ```

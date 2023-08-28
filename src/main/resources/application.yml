@@ -1,8 +1,10 @@
 aggregation:
-  base-url: http://localhost:8081/
+  base-url: http://127.0.0.1:8081/
   track-path: track
   shipment-path: shipments
   pricing-path: pricing
+  queue-size: 5
+  apiQueueTimeLimit: 5000 #in milli seconds
 
 logging.level:
   root: INFO

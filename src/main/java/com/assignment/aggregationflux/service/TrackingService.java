@@ -1,5 +1,6 @@
 package com.assignment.aggregationflux.service;
 
+import com.assignment.aggregationflux.properties.ConfigProperties;
 import com.assignment.aggregationflux.utils.AppClient;
 import com.assignment.aggregationflux.utils.AppConstant;
 import com.assignment.aggregationflux.utils.AppUtil;
@@ -7,9 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import reactor.retry.Repeat;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -25,9 +24,12 @@ public class TrackingService {
     private final Map<String, Mono<Map>> outgoingMap = new HashMap<>();
 
     AppClient appClient;
+    
+    ConfigProperties configProperties;
 
-    public TrackingService(AppClient appClient) {
+    public TrackingService(AppClient appClient, ConfigProperties configProperties) {
         this.appClient = appClient;
+        this.configProperties = configProperties;
     }
 
     public Mono<Map> process(Optional<List<String>> ids) {
@@ -46,14 +48,14 @@ public class TrackingService {
         trackingQueue.put(key, ids.get());
 
         Mono<Map<String, List<String>>> mono = Mono.fromCallable(() -> {
-            if (trackingQueue.size() >= 5) {
+            if (trackingQueue.size() >= configProperties.getQueueSize()) {
                 log.debug("Invoking API because Queue size reaches maximum " + trackingQueue.size());
                 appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_TRACKING_STR);
                 log.debug("Complete API because Queue size reaches maximum " + trackingQueue.size());
                 return trackingQueue;
             }
             //Wait for 5 seconds
-            Thread.sleep(5000);
+            Thread.sleep(configProperties.getApiQueueTimeLimit());
             log.debug("Invoking API because of timer expiry " + trackingQueue.size());
             appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_TRACKING_STR);
             log.debug("Complete API because Queue size reaches maximum " + trackingQueue.size());

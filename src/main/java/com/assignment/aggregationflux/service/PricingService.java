@@ -1,5 +1,6 @@
 package com.assignment.aggregationflux.service;
 
+import com.assignment.aggregationflux.properties.ConfigProperties;
 import com.assignment.aggregationflux.utils.AppClient;
 import com.assignment.aggregationflux.utils.AppConstant;
 import com.assignment.aggregationflux.utils.AppUtil;
@@ -25,9 +26,12 @@ public class PricingService {
     private final Map<String, Mono<Map>> outgoingMap = new HashMap<>();
 
     AppClient appClient;
+    
+    ConfigProperties configProperties;
 
-    public PricingService(AppClient appClient) {
+    public PricingService(AppClient appClient, ConfigProperties configProperties) {
         this.appClient = appClient;
+        this.configProperties = configProperties;
     }
 
     public Mono<Map> process(Optional<List<String>> ids) {
@@ -46,14 +50,14 @@ public class PricingService {
         pricingQueue.put(key, ids.get());
 
         Mono<Map<String, List<String>>> mono = Mono.fromCallable(() -> {
-            if (pricingQueue.size() >= 5) {
+            if (pricingQueue.size() >= configProperties.getQueueSize()) {
                 log.debug("Invoking API because Queue size reaches maximum " + pricingQueue.size());
                 appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_PRICING_STR);
                 log.debug("Complete API because Queue size reaches maximum " + pricingQueue.size());
                 return pricingQueue;
             }
             //Wait for 5 seconds
-            Thread.sleep(5000);
+            Thread.sleep(configProperties.getApiQueueTimeLimit());
             log.debug("Invoking API because of timer expiry " + pricingQueue.size());
             appClient.invokeApi(incomingQueue, outgoingMap, AppConstant.TYP_PRICING_STR);
             log.debug("Complete API because Queue size reaches maximum " + pricingQueue.size());

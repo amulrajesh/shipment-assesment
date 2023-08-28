@@ -6,15 +6,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import lombok.AllArgsConstructor;
-import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 
 import com.assignment.aggregationflux.model.Aggregate;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple3;
 
 @Service

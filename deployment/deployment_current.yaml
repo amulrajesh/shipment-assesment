@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aggregation-api
+  labels:
+    app: aggregation
+spec:
+  selector:
+    matchLabels:
+      app: aggregation-api
+  replicas: 2
+  template:
+    metadata:
+      name: aggregation-api
+      labels:
+        app: aggregation-api
+    spec:
+      containers:
+        - name: aggregation-api
+          image: amulrajesh/aggregation-api:0.0.1-SNAPSHOT
+          imagePullPolicy: Always

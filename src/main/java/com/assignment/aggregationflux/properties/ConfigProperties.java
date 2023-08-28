@@ -1,11 +1,7 @@
 package com.assignment.aggregationflux.properties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.time.Duration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -24,4 +20,8 @@ public class ConfigProperties {
     String shipmentPath;
 
     String pricingPath;
+    
+    Integer queueSize;
+    
+    Integer apiQueueTimeLimit;
 }

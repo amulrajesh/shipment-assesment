@@ -20,8 +20,6 @@ public class AggregationController {
 
     AggregationService aggregationService;
 
-    ShipmentService shipmentService;
-
     @GetMapping(value = "/aggregation" )
     @ResponseBody
     public Mono<Aggregate> aggregateData(@RequestParam(value = "track", required = false) Optional<List<String>> trackingIds
